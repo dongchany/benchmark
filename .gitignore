@@ -1,0 +1,15 @@
+.codex
+
+# Large local-only directories
+consumer_gpu_benchmark/envs/
+consumer_gpu_benchmark/artifacts/
+consumer_gpu_benchmark/logs/
+
+# Python / shell noise
+__pycache__/
+*.pyc
+*.pyo
+*.swp
+
+# Keep benchmark outputs, but ignore temporary cache-style files if they appear
+consumer_gpu_benchmark/results/normalized/

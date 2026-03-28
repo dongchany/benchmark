@@ -1,0 +1,17 @@
+{
+  "framework": "vllm",
+  "model_id": "qwen3.5-4b",
+  "hf_name": "Qwen/Qwen3.5-4B",
+  "model_path": "/home/dong/xilinx/huggingface/hub/models--Qwen--Qwen3.5-4B/snapshots/851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a",
+  "host": "127.0.0.1",
+  "port": 18000,
+  "base_url": "http://127.0.0.1:18000",
+  "devices": "1",
+  "tp_size": 1,
+  "gpu_memory_utilization": 0.60,
+  "enable_prefix_caching": 1,
+  "trust_remote_code": 0,
+  "pid": 310953,
+  "log_file": "/home/dong/workspace/tmp/benchmark/consumer_gpu_benchmark/logs/vllm/vllm_qwen3.5-4b_serve_20260328_164747.log",
+  "started_at": "2026-03-28T16:47:47+08:00"
+}

@@ -1,0 +1,17 @@
+{
+  "framework": "vllm",
+  "model_id": "qwen3.5-0.8b",
+  "scenario_id": "online_short_smoke",
+  "category": "online",
+  "base_url": "http://127.0.0.1:18000",
+  "request_rate": "1",
+  "max_concurrency": "1",
+  "dataset_type": "random",
+  "input_len": "64",
+  "output_len": "16",
+  "num_prompts": "16",
+  "repeat_index": 0,
+  "native_result_file": "/home/dong/workspace/tmp/benchmark/consumer_gpu_benchmark/results/raw/vllm_qwen3.5-0.8b_online_short_smoke_20260328_160854_r0_rr1_mc1.jsonl",
+  "gpu_result_file": "/home/dong/workspace/tmp/benchmark/consumer_gpu_benchmark/results/raw/vllm_qwen3.5-0.8b_online_short_smoke_20260328_160854_r0_rr1_mc1.gpu.csv",
+  "recorded_at": "2026-03-28T16:09:15+08:00"
+}

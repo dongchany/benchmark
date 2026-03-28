@@ -1,0 +1,409 @@
+{
+  "benchmark_policy": {
+    "single_gpu_device": "1",
+    "dual_gpu_devices": "0,1",
+    "single_gpu_priority": "Prefer GPU1 for single-GPU tests because GPU0 is partially occupied by desktop processes.",
+    "warmup_policy": "Run one smoke warmup before collecting formal measurements whenever the framework or model changes.",
+    "repeat_policy": "Use at least 2 formal repetitions for key online and offline scenarios when runtime is acceptable."
+  },
+  "phases": [
+    {
+      "id": "phase0_smoke",
+      "description": "Validate environment creation, service startup, health endpoint, /v1/models, and one minimal request path before formal benchmarks using the newest lightweight local representative model.",
+      "models": [
+        "qwen3.5-0.8b"
+      ],
+      "scenarios": [
+        "service_smoke",
+        "online_short_smoke",
+        "offline_short_smoke"
+      ]
+    },
+    {
+      "id": "phase1_single_gpu_core",
+      "description": "Main single-GPU comparison for consumer-grade deployment on one RTX 3080 Ti 12GB using a latest small dense model and a typical practical instruct model.",
+      "models": [
+        "qwen3.5-0.8b",
+        "qwen3-4b-instruct-2507"
+      ],
+      "scenarios": [
+        "online_short_latency",
+        "online_medium_balance",
+        "online_long_pressure",
+        "offline_short",
+        "offline_medium",
+        "offline_long",
+        "micro_prefill_decode",
+        "shared_prefix"
+      ]
+    },
+    {
+      "id": "phase2_long_context",
+      "description": "Stress long-context viability and memory stability on a single consumer GPU with the latest lightweight dense model and the typical 4B-class instruct model.",
+      "models": [
+        "qwen3.5-0.8b",
+        "qwen3-4b-instruct-2507"
+      ],
+      "scenarios": [
+        "long_context_4k",
+        "long_context_8k"
+      ]
+    },
+    {
+      "id": "phase3_dual_gpu_scaling",
+      "description": "Evaluate tensor-parallel scaling and multi-GPU overhead on two RTX 3080 Ti GPUs with the latest larger dense local checkpoint.",
+      "models": [
+        "qwen3.5-9b"
+      ],
+      "scenarios": [
+        "dual_gpu_online_medium",
+        "dual_gpu_offline_medium"
+      ]
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "service_smoke",
+      "category": "startup",
+      "description": "Start server, wait for /v1/models, record cold-start readiness and basic response correctness.",
+      "dataset": {
+        "type": "random",
+        "input_len": 32,
+        "output_len": 16,
+        "num_prompts": 1
+      },
+      "metrics_focus": [
+        "startup_time_s",
+        "health_ready",
+        "models_endpoint_ready",
+        "single_request_success"
+      ]
+    },
+    {
+      "id": "online_short_smoke",
+      "category": "online",
+      "description": "Minimal online serving check after service startup.",
+      "dataset": {
+        "type": "random",
+        "input_len": 64,
+        "output_len": 16,
+        "num_prompts": 16
+      },
+      "request_rates": [
+        1
+      ],
+      "max_concurrency": [
+        1
+      ],
+      "metrics_focus": [
+        "ttft_ms",
+        "itl_ms",
+        "e2e_latency_ms",
+        "failed_requests"
+      ]
+    },
+    {
+      "id": "offline_short_smoke",
+      "category": "offline",
+      "description": "Minimal offline throughput validation with very short prompts.",
+      "dataset": {
+        "type": "random",
+        "input_len": 64,
+        "output_len": 16,
+        "num_prompts": 32
+      },
+      "metrics_focus": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_throughput"
+      ]
+    },
+    {
+      "id": "online_short_latency",
+      "category": "online",
+      "description": "Low-latency interactive scenario representative of chat and coding assistants.",
+      "dataset": {
+        "type": "random",
+        "input_len": 256,
+        "output_len": 32,
+        "num_prompts": 200
+      },
+      "request_rates": [
+        1,
+        2,
+        4
+      ],
+      "max_concurrency": [
+        1,
+        4,
+        8
+      ],
+      "metrics_focus": [
+        "ttft_ms",
+        "itl_ms",
+        "tpot_ms",
+        "e2e_latency_ms",
+        "request_throughput",
+        "failed_requests"
+      ]
+    },
+    {
+      "id": "online_medium_balance",
+      "category": "online",
+      "description": "Balanced online scenario approximating normal assistant traffic.",
+      "dataset": {
+        "type": "random",
+        "input_len": 1024,
+        "output_len": 128,
+        "num_prompts": 300
+      },
+      "request_rates": [
+        2,
+        4,
+        8
+      ],
+      "max_concurrency": [
+        4,
+        8,
+        16
+      ],
+      "metrics_focus": [
+        "ttft_ms",
+        "itl_ms",
+        "e2e_latency_ms",
+        "request_throughput",
+        "output_token_throughput",
+        "failed_requests"
+      ]
+    },
+    {
+      "id": "online_long_pressure",
+      "category": "online",
+      "description": "Longer requests to expose scheduler efficiency and memory pressure.",
+      "dataset": {
+        "type": "random",
+        "input_len": 4096,
+        "output_len": 256,
+        "num_prompts": 120
+      },
+      "request_rates": [
+        1,
+        2,
+        4
+      ],
+      "max_concurrency": [
+        2,
+        4,
+        8
+      ],
+      "metrics_focus": [
+        "ttft_ms",
+        "request_throughput",
+        "output_token_throughput",
+        "oom_or_failures"
+      ]
+    },
+    {
+      "id": "offline_short",
+      "category": "offline",
+      "description": "Short offline generation throughput.",
+      "dataset": {
+        "type": "random",
+        "input_len": 256,
+        "output_len": 32,
+        "num_prompts": 200
+      },
+      "metrics_focus": [
+        "request_throughput",
+        "input_throughput",
+        "output_throughput",
+        "total_throughput"
+      ]
+    },
+    {
+      "id": "offline_medium",
+      "category": "offline",
+      "description": "Medium offline generation throughput.",
+      "dataset": {
+        "type": "random",
+        "input_len": 1024,
+        "output_len": 128,
+        "num_prompts": 200
+      },
+      "metrics_focus": [
+        "request_throughput",
+        "input_throughput",
+        "output_throughput",
+        "total_throughput"
+      ]
+    },
+    {
+      "id": "offline_long",
+      "category": "offline",
+      "description": "Long offline generation throughput under higher KV pressure.",
+      "dataset": {
+        "type": "random",
+        "input_len": 4096,
+        "output_len": 256,
+        "num_prompts": 100
+      },
+      "metrics_focus": [
+        "request_throughput",
+        "input_throughput",
+        "output_throughput",
+        "total_throughput",
+        "oom_or_failures"
+      ]
+    },
+    {
+      "id": "micro_prefill_decode",
+      "category": "micro",
+      "description": "Single-batch microbenchmark to separate prefill and decode behavior.",
+      "batch_sizes": [
+        1,
+        2,
+        4,
+        8,
+        16
+      ],
+      "input_lengths": [
+        256,
+        1024,
+        4096
+      ],
+      "output_lengths": [
+        1,
+        16,
+        64
+      ],
+      "metrics_focus": [
+        "prefill_latency_s",
+        "median_decode_latency_s",
+        "median_decode_throughput",
+        "batch_scaling"
+      ]
+    },
+    {
+      "id": "shared_prefix",
+      "category": "cache",
+      "description": "Prefix-sharing benchmark to evaluate cache friendliness and template-heavy workloads.",
+      "dataset": {
+        "type": "generated-shared-prefix",
+        "gsp_num_groups": 8,
+        "gsp_prompts_per_group": 8,
+        "gsp_system_prompt_len": 2048,
+        "gsp_question_len": 128,
+        "gsp_output_len": 128
+      },
+      "request_rates": [
+        2,
+        4,
+        8
+      ],
+      "max_concurrency": [
+        4,
+        8,
+        16
+      ],
+      "metrics_focus": [
+        "ttft_ms",
+        "request_throughput",
+        "cache_hit_rate_if_available"
+      ]
+    },
+    {
+      "id": "long_context_4k",
+      "category": "memory",
+      "description": "Stability and performance test at 4K input context on a single GPU.",
+      "dataset": {
+        "type": "random",
+        "input_len": 4096,
+        "output_len": 64,
+        "num_prompts": 64
+      },
+      "request_rates": [
+        1,
+        2
+      ],
+      "max_concurrency": [
+        2,
+        4
+      ],
+      "metrics_focus": [
+        "startup_success",
+        "ttft_ms",
+        "oom_or_failures",
+        "gpu_memory_peak"
+      ]
+    },
+    {
+      "id": "long_context_8k",
+      "category": "memory",
+      "description": "Aggressive long-context viability test at 8K input context on a single GPU.",
+      "dataset": {
+        "type": "random",
+        "input_len": 8192,
+        "output_len": 32,
+        "num_prompts": 32
+      },
+      "request_rates": [
+        1
+      ],
+      "max_concurrency": [
+        1,
+        2
+      ],
+      "metrics_focus": [
+        "startup_success",
+        "single_request_success",
+        "oom_or_failures",
+        "gpu_memory_peak"
+      ]
+    },
+    {
+      "id": "dual_gpu_online_medium",
+      "category": "online",
+      "description": "Two-GPU tensor-parallel online serving comparison.",
+      "dataset": {
+        "type": "random",
+        "input_len": 1024,
+        "output_len": 128,
+        "num_prompts": 240
+      },
+      "request_rates": [
+        2,
+        4,
+        8
+      ],
+      "max_concurrency": [
+        4,
+        8,
+        16
+      ],
+      "metrics_focus": [
+        "startup_time_s",
+        "ttft_ms",
+        "request_throughput",
+        "output_token_throughput",
+        "scaling_vs_single_gpu"
+      ]
+    },
+    {
+      "id": "dual_gpu_offline_medium",
+      "category": "offline",
+      "description": "Two-GPU tensor-parallel offline throughput comparison.",
+      "dataset": {
+        "type": "random",
+        "input_len": 1024,
+        "output_len": 128,
+        "num_prompts": 200
+      },
+      "metrics_focus": [
+        "request_throughput",
+        "output_throughput",
+        "total_throughput",
+        "scaling_vs_single_gpu"
+      ]
+    }
+  ]
+}
