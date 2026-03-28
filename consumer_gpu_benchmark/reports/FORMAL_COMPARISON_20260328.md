@@ -44,11 +44,6 @@ Validated results:
 - `nvcc=/usr/local/cuda-12.8/bin/nvcc`
 - `nvcc --version = 12.8`
 
-Related materials:
-
-- [CUDA12_8_SYSTEM_WIDE_MIN_CLEANUP.md](/home/dong/workspace/tmp/benchmark/consumer_gpu_benchmark/reports/CUDA12_8_SYSTEM_WIDE_MIN_CLEANUP.md)
-- [TOOLKIT_AUDIT_20260328.md](/home/dong/workspace/tmp/benchmark/consumer_gpu_benchmark/reports/TOOLKIT_AUDIT_20260328.md)
-
 ## Benchmark Scope
 
 ### Completed comparisons
@@ -223,10 +218,8 @@ Files:
 #### vLLM clean stable environment
 
 The original local benchmark vLLM dev environment failed during dual-GPU
-initialization. A separate clean stable environment was created:
-
-- env path: `/home/dong/workspace/tmp/benchmark/consumer_gpu_benchmark/envs/vllm_clean`
-- package: `vllm 0.18.0`
+initialization. A separate clean stable environment with `vllm 0.18.0` was
+used for the formal comparison runs below.
 
 Mean over 2 formal runs:
 
